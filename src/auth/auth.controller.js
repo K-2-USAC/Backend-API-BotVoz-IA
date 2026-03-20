@@ -10,7 +10,7 @@ export const register = async(req, res) =>{
         const user = await User.create(data);
         const token = await generateJWT(user.id);
 
-        res.cookie("autj_token", token, {
+        res.cookie("auth_token", token, {
             httpOnly: true,
             secure: true,
             sameSite: "None",
@@ -37,7 +37,7 @@ export const register = async(req, res) =>{
 
 export const login = async(req, res) =>{
     try{
-        const {email, password, username} = req.body;
+        const {email, password} = req.body;
 
         const user = await User.findOne({email: email});
 
@@ -60,7 +60,7 @@ export const login = async(req, res) =>{
         };
 
         const token = await generateJWT(user._id); 
-        res.cookie("login_token", token,{
+        res.cookie("auth_token", token,{
             httpOnly: true,
             secure: true,
             sameSite: "None",
