@@ -4,7 +4,6 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import express from "express";
-import ExpressMongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import authRoutes from "../src/auth/auth.routes.js";
 import userRoutes from "../src/user/user.routes.js";
@@ -24,7 +23,6 @@ const middlewares = (app) => {
     app.use(morgan("dev"));
     app.use(cookieParser());
     app.use(express.json());
-    app.use(ExpressMongoSanitize());
     app.use(express.urlencoded({ extended: false }));
 };
 
