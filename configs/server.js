@@ -6,6 +6,7 @@ import morgan from "morgan";
 import express from "express";
 import cookieParser from "cookie-parser";
 import authRoutes from "../src/auth/auth.routes.js";
+import userRoutes from "../src/user/user.routes.js";
 
 const whitelist =[
     "http://localhost:5173"
@@ -27,6 +28,7 @@ const middlewares = (app) => {
 
 const routes = (app) =>{
     app.use("/api/voice-ai/auth", authRoutes);
+    app.use("/api/voice-ai/user", userRoutes);
 }
 
 const connectionMongoDB = async() =>{
