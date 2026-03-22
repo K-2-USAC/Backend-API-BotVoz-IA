@@ -5,8 +5,13 @@ import helmet from "helmet";
 import morgan from "morgan";
 import express from "express";
 import cookieParser from "cookie-parser";
+import OpenAI from "openai";
+import dotenv from "dotenv";
 import authRoutes from "../src/auth/auth.routes.js";
 import userRoutes from "../src/user/user.routes.js";
+import groqRoutes from "../src/groq/groq.routes.js";
+
+dotenv.config();
 
 const whitelist =[
     "http://localhost:5173"
@@ -16,6 +21,11 @@ const corsOptions = {
     origin: whitelist,
     credentials: true
 }
+
+export const client = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1",
+});
 
 const middlewares = (app) => {
     app.use(helmet());
@@ -29,6 +39,7 @@ const middlewares = (app) => {
 const routes = (app) =>{
     app.use("/api/voice-ai/auth", authRoutes);
     app.use("/api/voice-ai/user", userRoutes);
+    app.use("/api/voice-ai/groq", groqRoutes);
 }
 
 const connectionMongoDB = async() =>{
@@ -49,6 +60,9 @@ export const initializeServer = async() => {
         app.listen(process.env.PORT, () => {
             console.log(`Server | Server is running on port ${process.env.PORT}`);
         });
+
+        
+        
     }catch(error){
         console.error("Error initializing server:", error);
     }
