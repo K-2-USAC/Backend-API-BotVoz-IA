@@ -9,7 +9,7 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 import authRoutes from "../src/auth/auth.routes.js";
 import userRoutes from "../src/user/user.routes.js";
-import groqRoutes from "../src/groq/groq.routes.js";
+import { setupVoiceWebSocket } from "../src/groq/groq.controller.js";
 
 dotenv.config();
 
@@ -39,7 +39,6 @@ const middlewares = (app) => {
 const routes = (app) =>{
     app.use("/api/voice-ai/auth", authRoutes);
     app.use("/api/voice-ai/user", userRoutes);
-    app.use("/api/voice-ai/groq", groqRoutes);
 }
 
 const connectionMongoDB = async() =>{
@@ -57,11 +56,12 @@ export const initializeServer = async() => {
         middlewares(app);
         routes(app);
         await connectionMongoDB();
-        app.listen(process.env.PORT, () => {
+
+        const server = app.listen(process.env.PORT, () => {
             console.log(`Server | Server is running on port ${process.env.PORT}`);
         });
 
-        
+        setupVoiceWebSocket(server);
         
     }catch(error){
         console.error("Error initializing server:", error);

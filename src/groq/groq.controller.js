@@ -1,34 +1,50 @@
-import { client } from "../../configs/server.js";
+import { WebSocketServer } from 'ws';
+import OpenAI from "openai";
+import { client as groqClient } from "../../configs/server.js";
 
-export const getResponse = async(req, res) =>{
-    try{
-        const { message } = req.body;
-        const systemRestrictions = [{
-            role: "system",
-            content: "You are a friendly conversation partner. If the user ask for a illegal request, you must refuse politely and tell them please we may speak of other topics, but be friendly. Use natural Spanish. Short replies. No lists.Be concise but engaging. No bullet points. Keep the flow like a real phone call.",
-        }]
+export const setupVoiceWebSocket = (server) => {
+    
+    const wss = new WebSocketServer({ 
+        server, 
+        path: "/api/voice-ai/groq/response" 
+    });
 
-        const chatCompletion = await client.chat.completions.create({
-            model: "llama-3.1-8b-instant",
-            messages: [
-                ...systemRestrictions,
-                { 
-                    role: "user", 
-                    content: message 
-                }
-            ],
-            temperature: 0.7,
-            max_tokens: 100,
+    wss.on('connection', (ws) => {
+        console.log("Cliente Java conectado al túnel WebSocket");
+
+        ws.on('message', async (message) => {
+            try {
+                const textUser = message.toString();
+                console.log("Java dice:", textUser);
+
+                const systemRestrictions = {
+                    role: "system",
+                    content: "You are a friendly conversation partner. If the user ask for a illegal request, you must refuse politely and tell them please we may speak of other topics, but be friendly. Use natural Spanish. Short replies. No lists. Be concise but engaging. Keep the flow like a real phone call."
+                };
+
+                const chatCompletion = await groqClient.chat.completions.create({
+                    model: "llama-3.1-8b-instant",
+                    messages: [
+                        systemRestrictions,
+                        { role: "user", content: textUser }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 100,
+                });
+
+                const respuestaIA = chatCompletion.choices[0].message.content || "Sin respuesta.";
+                
+                ws.send(JSON.stringify({ response: respuestaIA }));
+                console.log("Respuesta enviada a Java");
+
+            } catch (error) {
+                console.error("Error con Groq:", error.message);
+                ws.send(JSON.stringify({ error: "Error al procesar con la IA" }));
+            }
         });
 
-        return res.status(200).json({
-            response: chatCompletion.choices[0].message.content || "No se recibió una respuesta válida de la API de Groq."
-        })
-
-    }catch(error){
-        return res.status(500).json({
-            error: "Error al obtener la respuesta de la API de Groq.",
-            message: error.message
-        })
-    }
-}
+        ws.on('close', () => {
+            console.log("Cliente Java desconectado.");
+        });
+    });
+};
