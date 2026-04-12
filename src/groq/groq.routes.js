@@ -1,13 +1,8 @@
 import { Router } from "express";
-import { getResponse } from "./groq.controller.js";
-import { validateGroqIA } from "../middlewares/groq-ia-validator.js";
+import { handleTwilioCall } from "./groq.controller.js";
 
 const router = Router();
 
-router.post(
-    "/response",
-    validateGroqIA,
-    getResponse
-)
+router.post("/twilio", handleTwilioCall);
 
 export default router;
