@@ -9,6 +9,7 @@ import authRoutes from "../src/auth/auth.routes.js";
 import userRoutes from "../src/user/user.routes.js";
 import groqRoutes from "../src/groq/groq.routes.js";
 import projectRoutes from "../src/projects/project.routes.js";
+import callLogRoutes from "../src/callLog/callLog.routes.js";
 import User from "../src/user/user.model.js";
 
 const whitelist =[
@@ -34,6 +35,7 @@ const routes = (app) =>{
     app.use("/api/voice-ai/user", userRoutes);
     app.use("/api/voice-ai/groq", groqRoutes);
     app.use("/api/voice-ai/projects", projectRoutes);
+    app.use("/api/voice-ai/calls", callLogRoutes);
 }
 
 const connectionMongoDB = async() =>{

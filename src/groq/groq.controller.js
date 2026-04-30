@@ -2,6 +2,7 @@ import twilio from "twilio";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import Project from "../projects/project.model.js";
+import CallLog from "../callLog/callLog.model.js";
 
 dotenv.config();
 
@@ -28,9 +29,33 @@ export const handleTwilioCall = async (req, res) => {
   // Twilio manda el texto reconocido por voz en SpeechResult.
   const textUser = req.body.SpeechResult;
 
+  // Identificadores de la llamada que Twilio siempre envía en el body
+  const callSid    = req.body.CallSid    || null;
+  const callerPhone = req.body.From      || "unknown";
+  const calledPhone = req.body.To        || "unknown";
+
   // Si todavía no hay texto, se inicia el primer turno de conversación.
   if (!textUser) {
     console.log("Iniciando saludo...");
+
+    // Aseguramos que exista un registro de la llamada en la BD (upsert)
+    if (callSid) {
+      await CallLog.findOneAndUpdate(
+        { callSid },
+        {
+          $setOnInsert: {
+            callSid,
+            callerPhone,
+            calledPhone,
+            project: projectId || null,
+            status: "active",
+            startedAt: new Date(),
+          },
+        },
+        { upsert: true, new: true },
+      );
+    }
+
     // gather escucha la voz del usuario y, cuando termina, envía la transcripción a la ruta action.
     const gather = twiml.gather({
       input: "speech",
@@ -122,6 +147,37 @@ export const handleTwilioCall = async (req, res) => {
       chatCompletion.choices[0].message.content || "Sin respuesta.";
     console.log("Groq respondió:", respuestaIA);
 
+    // ── Persistir el turno de conversación en MongoDB ──────────────────────
+    if (callSid) {
+      await CallLog.findOneAndUpdate(
+        { callSid },
+        {
+          // Si el documento aún no existe, inicializarlo
+          $setOnInsert: {
+            callSid,
+            callerPhone,
+            calledPhone,
+            project: projectId || null,
+            status: "active",
+            startedAt: new Date(),
+          },
+          // Agregar ambos mensajes del turno al array
+          $push: {
+            messages: {
+              $each: [
+                { role: "user",      content: textUser,    timestamp: new Date() },
+                { role: "assistant", content: respuestaIA, timestamp: new Date() },
+              ],
+            },
+          },
+          // Actualizar la hora del último intercambio
+          $set: { endedAt: new Date() },
+        },
+        { upsert: true, new: true },
+      );
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
     // Se vuelve a usar gather para escuchar la siguiente respuesta del usuario.
     const gather = twiml.gather({
       input: "speech",
@@ -141,6 +197,15 @@ export const handleTwilioCall = async (req, res) => {
   } catch (error) {
     // Si Groq falla, se responde con un mensaje de error más amable.
     console.error("Error con Groq u operación de DB:", error.message);
+
+    // Marcar la llamada como fallida
+    if (callSid) {
+      await CallLog.findOneAndUpdate(
+        { callSid },
+        { $set: { status: "failed", endedAt: new Date() } },
+      ).catch(() => {}); // silencioso para no bloquear la respuesta TwiML
+    }
+
     twiml.say(
       { language: "es-MX" },
       "Tuve un pequeño problema técnico, pero sigo aquí. ¿Me repites lo último?",

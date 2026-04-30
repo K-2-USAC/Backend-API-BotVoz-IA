@@ -25,3 +25,12 @@ export const deleteUserValidator = [
     validateFields,
     catchErrors
 ]
+
+export const updateProfileValidator = [
+    validateJWT,
+    body("name").optional().notEmpty().withMessage("Name cannot be empty"),
+    body("surname").optional().notEmpty().withMessage("Surname cannot be empty"),
+    body("phone").optional().notEmpty().withMessage("Phone cannot be empty"),
+    validateFields,
+    catchErrors
+]
