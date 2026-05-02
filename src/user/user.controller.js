@@ -79,9 +79,59 @@ export const deleteUser = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-        success: false,
-        message: "Error deleting user",
-        error: error.message,
+            success: false,
+            message: "Error deleting user",
+            error: error.message,
         });
     }
 };
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error retrieving profile",
+            error: error.message
+        });
+    }
+};
+
+export const updateUserProfile = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const data = req.body;
+
+        // Evitar que el usuario cambie su propio rol o estado a través de esta ruta
+        delete data.role;
+        delete data.status;
+        delete data.password; // La contraseña se cambia en otra ruta
+
+        const updatedUser = await User.findByIdAndUpdate(uid, data, { new: true });
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: updatedUser
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error updating profile",
+            error: error.message
+        });
+    }
+};

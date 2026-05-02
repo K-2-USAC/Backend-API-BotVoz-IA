@@ -24,18 +24,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3005/api/voice-ai/auth/register",
+              "raw": "http://localhost:3000/api/voice-ai/auth/register",
               "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3005",
-              "path": [
-                "api",
-                "voice-ai",
-                "auth",
-                "register"
-              ]
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "auth", "register"]
             }
           },
           "response": []
@@ -55,18 +48,35 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3005/api/voice-ai/auth/login",
+              "raw": "http://localhost:3000/api/voice-ai/auth/login",
               "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3005",
-              "path": [
-                "api",
-                "voice-ai",
-                "auth",
-                "login"
-              ]
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idToken\": \"TOKEN_DE_GOOGLE_AQUI\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/auth/google",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "auth", "google"]
             }
           },
           "response": []
@@ -82,18 +92,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3005/api/voice-ai/user/",
+              "raw": "http://localhost:3000/api/voice-ai/user/",
               "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3005",
-              "path": [
-                "api",
-                "voice-ai",
-                "user",
-                ""
-              ]
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "user", ""]
             }
           },
           "response": []
@@ -113,19 +116,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3005/api/voice-ai/user/update-password/:uid",
+              "raw": "http://localhost:3000/api/voice-ai/user/update-password/:uid",
               "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3005",
-              "path": [
-                "api",
-                "voice-ai",
-                "user",
-                "update-password",
-                ":uid"
-              ],
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "user", "update-password", ":uid"],
               "variable": [
                 {
                   "key": "uid",
@@ -142,23 +137,162 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "http://localhost:3005/api/voice-ai/user/delete/:uid",
+              "raw": "http://localhost:3000/api/voice-ai/user/delete/:uid",
               "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3005",
-              "path": [
-                "api",
-                "voice-ai",
-                "user",
-                "delete",
-                ":uid"
-              ],
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "user", "delete", ":uid"],
               "variable": [
                 {
                   "key": "uid",
                   "value": "69bb7e246a12e6c515963d87"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Pizza Chapina\",\r\n  \"description\": \"Pizzería local en zona 10, Ciudad de Guatemala.\",\r\n  \"agentId\": \"agente-twilio-123\",\r\n  \"context\": \"Vendemos pizzas artesanales hechas en horno de leña.\",\r\n  \"voiceTone\": \"Amigable\",\r\n  \"targetAudience\": \"Jóvenes y familias\",\r\n  \"language\": \"es-GT\",\r\n  \"businessHours\": \"Lunes a Domingo de 12:00 PM a 10:00 PM\",\r\n  \"knowledgeBase\": [\r\n    \"La especialidad de la casa es la pizza de 5 carnes.\",\r\n    \"Servicio a domicilio disponible por Q15 adicionales.\"\r\n  ],\r\n  \"faqs\": [\r\n    {\r\n      \"question\": \"¿Aceptan tarjetas?\",\r\n      \"answer\": \"Sí, aceptamos tarjetas Visa y Mastercard.\"\r\n    }\r\n  ],\r\n  \"type\": \"Restaurante\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Projects By Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects?name=pizza",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "pizza"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ID_DEL_PROYECTO_AQUI"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"description\": \"Pizzería local en zona 10, ahora con nueva sucursal en zona 1.\",\r\n  \"voiceTone\": \"Profesional\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ID_DEL_PROYECTO_AQUI"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/voice-ai/projects/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "voice-ai", "projects", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ID_DEL_PROYECTO_AQUI"
                 }
               ]
             }
