@@ -60,6 +60,14 @@ const projectSchema = new Schema(
       ref: "User",
       required: [true, "User is required"],
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    twilioPhoneNumberSid: {
+      type: String,
+      default: "PNea322d7c969c641a210077b8fdfeb751",
+    },
   },
   {
     timestamps: true,
