@@ -5,6 +5,10 @@ export const createProject = async (req, res) => {
     const data = req.body;
     data.user = req.user._id;
 
+    // Deactivate all other projects for this user
+    await Project.updateMany({ user: req.user._id }, { isActive: false });
+
+    // The new project will automatically have isActive: true and the Twilio SID
     const project = await Project.create(data);
 
     return res.status(201).json({
@@ -156,6 +160,48 @@ export const deleteProject = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error deleting project",
+      error: error.message,
+    });
+  }
+};
+
+export const activateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const query = { _id: id, status: true };
+    if (req.user.role !== "admin") {
+      query.user = req.user._id;
+    }
+
+    const projectExists = await Project.findOne(query);
+
+    if (!projectExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or not yours",
+      });
+    }
+
+    // Deactivate all projects for this user
+    await Project.updateMany({ user: projectExists.user }, { isActive: false });
+
+    // Activate the selected project
+    const project = await Project.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Project activated successfully",
+      project,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error activating project",
       error: error.message,
     });
   }

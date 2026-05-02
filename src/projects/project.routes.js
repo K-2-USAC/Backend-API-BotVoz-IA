@@ -4,7 +4,8 @@ import {
     getProjects,
     getProjectById,
     updateProject,
-    deleteProject
+    deleteProject,
+    activateProject
 } from "./project.controller.js";
 import {
     createProjectValidator,
@@ -30,5 +31,8 @@ router.put("/:id", updateProjectValidator, updateProject);
 
 // Soft delete a project
 router.delete("/:id", deleteProjectValidator, deleteProject);
+
+// Activate a project
+router.patch("/:id/activate", validateJWT, activateProject);
 
 export default router;

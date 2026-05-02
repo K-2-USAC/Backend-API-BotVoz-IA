@@ -90,23 +90,29 @@ export const handleTwilioCall = async (req, res) => {
         - No asumas información que no te hayan dado.
         - Mantén el flujo conversacional.`;
 
-    // Si se envió el ID de un proyecto por la URL, nutrimos la IA con esa data
+    // 1. Intentar obtener el proyecto (prioridad al ID en URL, sino buscar el activo)
+    let project = null;
     if (projectId) {
-      const project = await Project.findById(projectId);
-      if (project) {
-        const faqs =
-          project.faqs && project.faqs.length > 0
-            ? project.faqs
-                .map((f) => `Q: ${f.question} | A: ${f.answer}`)
-                .join("\n")
-            : "No hay FAQs.";
+      project = await Project.findById(projectId);
+    } else {
+      project = await Project.findOne({ isActive: true });
+    }
 
-        const kb =
-          project.knowledgeBase && project.knowledgeBase.length > 0
-            ? project.knowledgeBase.join(", ")
-            : "Sin conocimiento adicional.";
+    // Si encontramos un proyecto (ya sea por ID o por ser el activo)
+    if (project) {
+      const faqs =
+        project.faqs && project.faqs.length > 0
+          ? project.faqs
+              .map((f) => `Q: ${f.question} | A: ${f.answer}`)
+              .join("\n")
+          : "No hay FAQs.";
 
-        systemPrompt = `Eres un asistente de IA para el negocio llamado "${project.name}".
+      const kb =
+        project.knowledgeBase && project.knowledgeBase.length > 0
+          ? project.knowledgeBase.join(", ")
+          : "Sin conocimiento adicional.";
+
+      systemPrompt = `Eres un asistente de IA para el negocio llamado "${project.name}".
                 Tono de voz: ${project.voiceTone || "Profesional y amigable"}.
                 Audiencia objetivo: ${project.targetAudience || "General"}.
                 
@@ -126,7 +132,6 @@ export const handleTwilioCall = async (req, res) => {
                 - Mantén tus respuestas cortas y al grano, máximo 2 o 3 oraciones.
                 - Evita leer listas largas. Trata de mantener un diálogo interactivo.
                 - Basa todas tus respuestas estrictamente en el contexto y FAQs proveídos del negocio.`;
-      }
     }
 
     const systemRestrictions = {
