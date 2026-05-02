@@ -31,6 +31,13 @@ const middlewares = (app) => {
 };
 
 const routes = (app) =>{
+    app.get("/", (req, res) => {
+        res.status(200).json({
+            message: "Welcome to the Voice AI Backend API",
+            status: "Online",
+            documentation: "https://backend-api-bot-voz-ia.vercel.app/api/voice-ai/docs" // Assuming they might have docs
+        });
+    });
     app.use("/api/voice-ai/auth", authRoutes);
     app.use("/api/voice-ai/user", userRoutes);
     app.use("/api/voice-ai/groq", groqRoutes);
