@@ -85,12 +85,17 @@ export const initializeServer = async() => {
         await connectionMongoDB();
         await createDefaultAdmin();
 
-        const server = app.listen(process.env.PORT, () => {
-            console.log(`Server | Server is running on port ${process.env.PORT}`);
-        });
-
+        // En Vercel no es estrictamente necesario el app.listen, 
+        // pero lo mantenemos para desarrollo local.
+        if (process.env.NODE_ENV !== 'production') {
+            app.listen(process.env.PORT, () => {
+                console.log(`Server | Server is running on port ${process.env.PORT}`);
+            });
+        }
         
+        return app;
     }catch(error){
         console.error("Error initializing server:", error);
+        return app;
     }
 }
