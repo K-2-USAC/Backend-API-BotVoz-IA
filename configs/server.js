@@ -14,8 +14,8 @@ import User from "../src/user/user.model.js";
 
 const whitelist = [
   "http://localhost:5173",
-  "https://vox2k-af31kr9hu-luisrafaelcr27-gmailcoms-projects.vercel.app",
   "https://backend-api-bot-voz-ia.vercel.app",
+  "https://vox2k.vercel.app",
 ];
 
 const corsOptions = {
@@ -54,7 +54,7 @@ const connectionMongoDB = async () => {
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
     if (process.env.NODE_ENV !== "production") {
-        process.exit(1);
+      process.exit(1);
     }
   }
 };
