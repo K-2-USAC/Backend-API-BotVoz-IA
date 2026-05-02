@@ -13,7 +13,9 @@ import callLogRoutes from "../src/callLog/callLog.routes.js";
 import User from "../src/user/user.model.js";
 
 const whitelist =[
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://vox2k-af31kr9hu-luisrafaelcr27-gmailcoms-projects.vercel.app",
+    "https://backend-api-bot-voz-ia.vercel.app" // Agregamos por si acaso
 ]
 
 const corsOptions = {
