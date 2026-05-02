@@ -19,6 +19,10 @@ export const validateJWT = async (req, res, next) => {
 
     token = token.replace(/^Bearer\s+/, "");
 
+    if (!process.env.SECRET_KEY) {
+        throw new Error("SECRET_KEY is not defined in environment variables");
+    }
+
     const { uid } = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(uid);
 
@@ -39,6 +43,7 @@ export const validateJWT = async (req, res, next) => {
     req.user = user;
     next();
     } catch (error) {
+    console.error("JWT Validation Error:", error.message);
     return res.status(500).json({
         success: false,
         message: "Error at validate token",

@@ -14,8 +14,8 @@ export const register = async (req, res) => {
 
     res.cookie("auth_token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 60 * 60 * 1000, // 1 hora de vida del token
     });
 
@@ -64,8 +64,8 @@ export const login = async (req, res) => {
     const token = await generateJWT(user._id);
     res.cookie("auth_token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 60 * 60 * 1000, // 1 hora de vida del token
     });
 
@@ -129,8 +129,8 @@ export const googleLogin = async (req, res) => {
 
     res.cookie("auth_token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 60 * 60 * 1000,
     });
 
