@@ -4,11 +4,16 @@ import {
   getCallByCallSid,
   getCallsByProject,
   deleteCall,
+  getGlobalStats,
 } from "./callLog.controller.js";
 import { validateJWT } from "../middlewares/validate-jwt.js";
 import { hasRoles } from "../middlewares/validate-role.js";
 
 const router = Router();
+
+// Obtener estadísticas globales
+// GET /api/voice-ai/calls/stats/global
+router.get("/stats/global", validateJWT, getGlobalStats);
 
 // Obtener todas las llamadas (paginado) — protegido por JWT
 // GET /api/voice-ai/calls?page=1&limit=20&projectId=xxx&status=completed
