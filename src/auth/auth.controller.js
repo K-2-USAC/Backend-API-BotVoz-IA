@@ -96,7 +96,14 @@ export const googleLogin = async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    const { name, given_name, family_name, email, picture, sub: googleId } = ticket.getPayload();
+    const {
+      name,
+      given_name,
+      family_name,
+      email,
+      picture,
+      sub: googleId,
+    } = ticket.getPayload();
 
     let user = await User.findOne({ email });
 
