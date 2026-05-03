@@ -1,4 +1,5 @@
 import Project from "./project.model.js";
+import User from "../user/user.model.js";
 
 export const createProject = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ export const getProjects = async (req, res) => {
 
     const [total, projects] = await Promise.all([
       Project.countDocuments(query),
-      projectsQuery,
+      projectsQuery.exec(),
     ]);
 
     return res.status(200).json({
