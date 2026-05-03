@@ -13,6 +13,7 @@ export const getUser = [
 export const updatePasswordValidator = [
     validateJWT,
     param("uid", "Invalid user ID").isMongoId(),
+    body("oldPassword", "Old password is required").notEmpty(),
     body("newPassword", "New password must be at least 8 characters long").notEmpty().withMessage("New password is required").isLength({min: 8}),
     validateFields,
     catchErrors

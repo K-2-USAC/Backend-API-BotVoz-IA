@@ -1,23 +1,27 @@
 import { Router } from "express";
 import { register, login, googleLogin } from "./auth.controller.js";
 import { loginValidator, registerValidator } from "../middlewares/auth-validator.js";
+import { authLimiter } from "../middlewares/rate-limit.js";
 
 const router = Router();
 
 router.post(
     "/register", 
-    register,
-    registerValidator
+    authLimiter,
+    registerValidator,
+    register
 );
 
 router.post(
     "/login",
-    login,
-    loginValidator
+    authLimiter,
+    loginValidator,
+    login
 )
 
 router.post(
     "/google",
+    authLimiter,
     googleLogin
 )
 

@@ -23,7 +23,15 @@ export const getAllUsers = async(req, res) =>{
 export const updatePassword = async(req,res) =>{
     try{
         const {uid} = req.params;
-        const {newPassword} = req.body;
+        const {oldPassword, newPassword} = req.body;
+
+        // Validar que el usuario solo pueda cambiar su propia contraseña (IDOR fix)
+        if (req.user._id.toString() !== uid && req.user.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "No tienes permiso para cambiar esta contraseña"
+            });
+        }
 
         const user = await User.findById(uid);
 
@@ -31,6 +39,18 @@ export const updatePassword = async(req,res) =>{
             return res.status(404).json({
                 success: false,
                 message: "User not found"
+            })
+        }
+
+        // Verificar contraseña antigua
+        const matchOldPassword = await argon2.verify(user.password, oldPassword);
+
+        // Si es admin y está cambiando otra cuenta, podríamos saltar este paso, pero por seguridad y simplicidad lo requerimos.
+        // Opcionalmente, si es admin y cambia otra clave, omitimos la verificación de oldPassword si es incorrecta.
+        if(!matchOldPassword && req.user._id.toString() === uid){
+            return res.status(401).json({
+                success: false,
+                message: "La contraseña antigua es incorrecta"
             })
         }
 
