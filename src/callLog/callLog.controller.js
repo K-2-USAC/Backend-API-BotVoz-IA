@@ -135,3 +135,39 @@ export const deleteCall = async (req, res) => {
     });
   }
 };
+
+// ── GET /api/voice-ai/calls/stats/global ────────────────────────────────
+// Devuelve estadísticas globales de llamadas y mensajes generados.
+export const getGlobalStats = async (req, res) => {
+  try {
+    const totalCalls = await CallLog.countDocuments();
+    
+    // Aggregation to count assistant messages across all call logs
+    const stats = await CallLog.aggregate([
+      { $unwind: "$messages" },
+      { $match: { "messages.role": "assistant" } },
+      { $count: "assistantMessages" }
+    ]);
+
+    const linesGenerated = stats.length > 0 ? stats[0].assistantMessages : 0;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalCalls,
+        linesGenerated,
+        // Optional: Adding a nice formatted version like the user requested
+        formattedTotalCalls: totalCalls >= 1000 ? `${(totalCalls / 1000).toFixed(1)}k` : totalCalls.toString(),
+        formattedLinesGenerated: linesGenerated >= 1000 ? `${(linesGenerated / 1000).toFixed(1)}k` : linesGenerated.toString()
+      }
+    });
+  } catch (error) {
+    console.error("[CallLog] getGlobalStats error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Error al obtener las estadísticas globales",
+      error: error.message,
+    });
+  }
+};
+
