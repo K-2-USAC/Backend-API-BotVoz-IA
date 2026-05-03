@@ -19,12 +19,27 @@ const whitelist = [
 ];
 
 const corsOptions = {
-  origin: whitelist,
+  origin: function (origin, callback) {
+    if (
+      !origin ||
+      whitelist.indexOf(origin) !== -1 ||
+      origin.endsWith(".vercel.app")
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 };
 
 const middlewares = (app) => {
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+  );
   app.use(cors(corsOptions));
   app.use(morgan("dev"));
   app.use(cookieParser());
