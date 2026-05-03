@@ -146,7 +146,10 @@ export const googleLogin = async (req, res) => {
       message: "Google login successful",
       userDetails: {
         id: user._id,
+        name: user.name,
+        email: user.email,
         role: user.role,
+        image: user.image
       },
     });
   } catch (error) {
