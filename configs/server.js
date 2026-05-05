@@ -102,6 +102,8 @@ const createDefaultAdmin = async () => {
 
 export const initializeServer = async () => {
   const app = express();
+  // Required behind Vercel/proxies so req.ip and security middlewares work correctly
+  app.set("trust proxy", 1);
   try {
     middlewares(app);
     routes(app);

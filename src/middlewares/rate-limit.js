@@ -5,6 +5,7 @@ export const authLimiter = rateLimit({
   max: 50, // Limita a 50 peticiones por IP por ventana
   // Ignorar peticiones OPTIONS (preflight de CORS) para que no sean bloqueadas
   skip: (req) => req.method === "OPTIONS",
+  skipSuccessfulRequests: true, // No penaliza intentos que sí autentican
   message: {
     success: false,
     message:
