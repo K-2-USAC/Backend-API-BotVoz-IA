@@ -2,7 +2,9 @@ import rateLimit from "express-rate-limit";
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 50, // Limita a 5 peticiones por IP por ventana
+  max: 50, // Limita a 50 peticiones por IP por ventana
+  // Ignorar peticiones OPTIONS (preflight de CORS) para que no sean bloqueadas
+  skip: (req) => req.method === "OPTIONS",
   message: {
     success: false,
     message:

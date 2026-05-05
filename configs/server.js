@@ -40,7 +40,10 @@ const middlewares = (app) => {
       crossOriginResourcePolicy: { policy: "cross-origin" },
     }),
   );
+  // CORS debe ir antes que cualquier otro middleware para que los preflights pasen
   app.use(cors(corsOptions));
+  // Responder explícitamente a todas las peticiones OPTIONS (preflight)
+  app.options("*", cors(corsOptions));
   app.use(morgan("dev"));
   app.use(cookieParser());
   app.use(express.json());
