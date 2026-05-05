@@ -11,7 +11,7 @@ export const validateJWT = async (req, res, next) => {
         req.headers["authorization"];
 
     if (!token) {
-        return res.status(400).json({
+        return res.status(401).json({
         success: false,
         message: "Token not found",
         });
@@ -23,18 +23,27 @@ export const validateJWT = async (req, res, next) => {
         throw new Error("SECRET_KEY is not defined in environment variables");
     }
 
-    const { uid } = jwt.verify(token, process.env.SECRET_KEY);
+    let uid;
+    try {
+        ({ uid } = jwt.verify(token, process.env.SECRET_KEY));
+    } catch (jwtError) {
+        return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+        });
+    }
+
     const user = await User.findById(uid);
 
     if (!user) {
-        return res.status(400).json({
+        return res.status(401).json({
         success: false,
         message: "The user doesn't exist in the database",
         });
     }
 
     if (user.status === false) {
-        return res.status(400).json({
+        return res.status(401).json({
         success: false,
         message: "User deactivated previously",
         });
@@ -46,8 +55,7 @@ export const validateJWT = async (req, res, next) => {
     console.error("JWT Validation Error:", error.message);
     return res.status(500).json({
         success: false,
-        message: "Error at validate token",
-        error: error.message,
+        message: "Server error while validating token",
         });
     }
 };
