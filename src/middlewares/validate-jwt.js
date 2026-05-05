@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../user/user.model.js"
+import User from "../user/user.model.js";
 
 const getJwtSecret = () =>
     process.env.SECRET_KEY ||
@@ -7,19 +7,18 @@ const getJwtSecret = () =>
     process.env.SECRETORPRIVATEKEY;
 
 export const validateJWT = async (req, res, next) => {
-    try {
-    
+  try {
     let token =
-        req.cookies?.auth_token ||
-        req.body.token ||
-        req.query.token ||
-        req.headers["authorization"];
+      req.cookies?.auth_token ||
+      req.body.token ||
+      req.query.token ||
+      req.headers["authorization"];
 
     if (!token) {
         return res.status(401).json({
         success: false,
         message: "Token not found",
-        });
+      });
     }
 
     token = token.replace(/^Bearer\s+/, "");
@@ -48,14 +47,14 @@ export const validateJWT = async (req, res, next) => {
         return res.status(401).json({
         success: false,
         message: "The user doesn't exist in the database",
-        });
+      });
     }
 
     if (user.status === false) {
         return res.status(401).json({
         success: false,
         message: "User deactivated previously",
-        });
+      });
     }
 
     req.user = user;
@@ -70,22 +69,12 @@ export const validateJWT = async (req, res, next) => {
 };
 
 export const validateTokenResponse = async (req, res) => {
-    try {
-        
-        let token =
-        req.cookies?.auth_token ||
-        req.body.token ||
-        req.query.token ||
-        req.headers["authorization"];
-
-        if (!token) {
-        return res.status(401).json({
-            success: false,
-            message: "Token not found",
-        });
-        }
-
-        token = token.replace(/^Bearer\s+/, "");
+  try {
+    let token =
+      req.cookies?.auth_token ||
+      req.body.token ||
+      req.query.token ||
+      req.headers["authorization"];
 
         const jwtSecret = getJwtSecret();
         if (!jwtSecret) {
@@ -98,36 +87,22 @@ export const validateTokenResponse = async (req, res) => {
         const { uid } = jwt.verify(token, jwtSecret);
         const user = await User.findById(uid);
 
-        if (!user) {
-        return res.status(401).json({
-            success: false,
-            message: "The user doesn't exist in the database",
-        });
-        }
+    token = token.replace(/^Bearer\s+/, "");
 
-        if (user.status === false) {
-        return res.status(401).json({
-            success: false,
-            message: "User deactivated previously",
-            });
-        }
+    const { uid } = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(uid);
 
-        return res.status(200).json({
-        success: true,
-        message: "Token is valid",
-        user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            },
-        });
-
-    } catch (error) {
-        return res.status(401).json({
+    if (!user) {
+      return res.status(401).json({
         success: false,
-        message: "Invalid or expired token",
-        error: error.message,
-        });
+        message: "The user doesn't exist in the database",
+      });
+    }
+
+    if (user.status === false) {
+      return res.status(401).json({
+        success: false,
+        message: "User deactivated previously",
+      });
     }
 };
