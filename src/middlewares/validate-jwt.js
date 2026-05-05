@@ -61,10 +61,10 @@ export const validateJWT = async (req, res, next) => {
     req.user = user;
     next();
     } catch (error) {
-    console.error("JWT Validation Error:", error.message);
-    return res.status(500).json({
+    console.error("JWT Validation Error:", error);
+    return res.status(401).json({
         success: false,
-        message: "Server error while validating token",
+        message: "Invalid or expired token",
         });
     }
 };
