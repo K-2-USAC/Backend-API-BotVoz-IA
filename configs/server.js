@@ -35,6 +35,7 @@ const corsOptions = {
     callback(null, isExactAllowed || isVercelPreview);
   },
   credentials: true,
+  optionsSuccessStatus: 204, // Para compatibilidad con navegadores legacy en preflights
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204,

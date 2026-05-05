@@ -76,20 +76,24 @@ export const validateTokenResponse = async (req, res) => {
       req.query.token ||
       req.headers["authorization"];
 
-        const jwtSecret = getJwtSecret();
-        if (!jwtSecret) {
-        return res.status(500).json({
-            success: false,
-            message: "JWT secret is not configured on server",
-        });
-        }
-
-        const { uid } = jwt.verify(token, jwtSecret);
-        const user = await User.findById(uid);
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token not found",
+      });
+    }
 
     token = token.replace(/^Bearer\s+/, "");
 
-    const { uid } = jwt.verify(token, process.env.SECRET_KEY);
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT secret is not configured on server",
+      });
+    }
+
+    const { uid } = jwt.verify(token, jwtSecret);
     const user = await User.findById(uid);
 
     if (!user) {
@@ -105,4 +109,23 @@ export const validateTokenResponse = async (req, res) => {
         message: "User deactivated previously",
       });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Token is valid",
+      userDetails: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+      },
+    });
+  } catch (error) {
+    console.error("Token validation error:", error);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
