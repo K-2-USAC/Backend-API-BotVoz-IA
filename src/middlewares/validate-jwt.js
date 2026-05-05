@@ -1,6 +1,11 @@
 import jwt from "jsonwebtoken";
 import User from "../user/user.model.js"
 
+const getJwtSecret = () =>
+    process.env.SECRET_KEY ||
+    process.env.JWT_SECRET ||
+    process.env.SECRETORPRIVATEKEY;
+
 export const validateJWT = async (req, res, next) => {
     try {
     
@@ -19,13 +24,17 @@ export const validateJWT = async (req, res, next) => {
 
     token = token.replace(/^Bearer\s+/, "");
 
-    if (!process.env.SECRET_KEY) {
-        throw new Error("SECRET_KEY is not defined in environment variables");
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+        return res.status(500).json({
+        success: false,
+        message: "JWT secret is not configured on server",
+        });
     }
 
     let uid;
     try {
-        ({ uid } = jwt.verify(token, process.env.SECRET_KEY));
+        ({ uid } = jwt.verify(token, jwtSecret));
     } catch (jwtError) {
         return res.status(401).json({
         success: false,
@@ -78,7 +87,15 @@ export const validateTokenResponse = async (req, res) => {
 
         token = token.replace(/^Bearer\s+/, "");
 
-        const { uid } = jwt.verify(token, process.env.SECRET_KEY);
+        const jwtSecret = getJwtSecret();
+        if (!jwtSecret) {
+        return res.status(500).json({
+            success: false,
+            message: "JWT secret is not configured on server",
+        });
+        }
+
+        const { uid } = jwt.verify(token, jwtSecret);
         const user = await User.findById(uid);
 
         if (!user) {
