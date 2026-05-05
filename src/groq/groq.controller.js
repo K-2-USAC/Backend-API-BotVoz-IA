@@ -9,11 +9,21 @@ dotenv.config();
 // Extrae la clase que Twilio usa para construir respuestas de voz en TwiML.
 const { VoiceResponse } = twilio.twiml;
 
-// Cliente de Groq usando el SDK de OpenAI, pero apuntando al endpoint de Groq.
-const groqClient = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+let groqClient = null;
+
+const getGroqClient = () => {
+  const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+
+  if (!groqClient) {
+    groqClient = new OpenAI({
+      apiKey,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+  }
+
+  return groqClient;
+};
 
 export const handleTwilioCall = async (req, res) => {
   // Muestra en consola lo que Twilio envía al webhook.
@@ -84,6 +94,11 @@ export const handleTwilioCall = async (req, res) => {
   console.log("Usuario Dice:", textUser);
 
   try {
+    const aiClient = getGroqClient();
+    if (!aiClient) {
+      throw new Error("Missing GROQ_API_KEY / OPENAI_API_KEY");
+    }
+
     let systemPrompt = `Eres un asistente conversacional útil y fluido por teléfono.
         Reglas:
         - Mantén un tono amigable, directo y conversacional. Respuestas cortas y fluidas.
@@ -140,7 +155,7 @@ export const handleTwilioCall = async (req, res) => {
     };
 
     // Envía el mensaje del usuario a Groq y pide una completación de chat.
-    const chatCompletion = await groqClient.chat.completions.create({
+    const chatCompletion = await aiClient.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [systemRestrictions, { role: "user", content: textUser }],
       temperature: 0.7,

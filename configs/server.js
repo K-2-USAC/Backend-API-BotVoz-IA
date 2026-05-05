@@ -12,25 +12,32 @@ import projectRoutes from "../src/projects/project.routes.js";
 import callLogRoutes from "../src/callLog/callLog.routes.js";
 import User from "../src/user/user.model.js";
 
-const whitelist = [
+const whitelist = new Set([
   "http://localhost:5173",
   "https://backend-api-bot-voz-ia.vercel.app",
   "https://vox2k.vercel.app",
-];
+]);
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (
-      !origin ||
-      whitelist.indexOf(origin) !== -1 ||
-      origin.endsWith(".vercel.app")
-    ) {
+  origin: (origin, callback) => {
+    // Same-origin/server-to-server requests may not include Origin
+    if (!origin) {
       callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+      return;
     }
+
+    const isExactAllowed = whitelist.has(origin);
+    const isVercelPreview =
+      typeof origin === "string" &&
+      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+
+    // Never throw from CORS origin callback (that becomes HTTP 500 on preflight)
+    callback(null, isExactAllowed || isVercelPreview);
   },
   credentials: true,
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
 };
 
 const middlewares = (app) => {
@@ -42,8 +49,7 @@ const middlewares = (app) => {
   );
   // CORS debe ir antes que cualquier otro middleware para que los preflights pasen
   app.use(cors(corsOptions));
-  // Responder explícitamente a todas las peticiones OPTIONS (preflight)
-  app.options("*", cors(corsOptions));
+  app.options(/.*/, cors(corsOptions));
   app.use(morgan("dev"));
   app.use(cookieParser());
   app.use(express.json());
