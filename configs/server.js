@@ -31,6 +31,7 @@ const corsOptions = {
     }
   },
   credentials: true,
+  optionsSuccessStatus: 204, // Para compatibilidad con navegadores legacy en preflights
 };
 
 const middlewares = (app) => {
@@ -43,7 +44,8 @@ const middlewares = (app) => {
   // CORS debe ir antes que cualquier otro middleware para que los preflights pasen
   app.use(cors(corsOptions));
   // Responder explícitamente a todas las peticiones OPTIONS (preflight)
-  app.options("*", cors(corsOptions));
+  // Nota: usar /(.*)/  en lugar de "*" por compatibilidad con path-to-regexp v8+
+  app.options(/(.*)/, cors(corsOptions));
   app.use(morgan("dev"));
   app.use(cookieParser());
   app.use(express.json());
