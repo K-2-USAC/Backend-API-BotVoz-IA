@@ -2,56 +2,58 @@ import jwt from "jsonwebtoken";
 import User from "../user/user.model.js";
 
 const getJwtSecret = () =>
-    process.env.SECRET_KEY ||
-    process.env.JWT_SECRET ||
-    process.env.SECRETORPRIVATEKEY;
+  process.env.SECRET_KEY ||
+  process.env.JWT_SECRET ||
+  process.env.SECRETORPRIVATEKEY;
+
+const extractToken = (req) =>
+  req.cookies?.auth_token ||
+  req.body?.token ||
+  req.query?.token ||
+  req.headers?.authorization;
 
 export const validateJWT = async (req, res, next) => {
   try {
-    let token =
-      req.cookies?.auth_token ||
-      req.body.token ||
-      req.query.token ||
-      req.headers["authorization"];
+    let token = extractToken(req);
 
     if (!token) {
-        return res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "Token not found",
       });
     }
 
-    token = token.replace(/^Bearer\s+/, "");
+    token = token.replace(/^Bearer\s+/i, "");
 
     const jwtSecret = getJwtSecret();
     if (!jwtSecret) {
-        return res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "JWT secret is not configured on server",
-        });
+      });
     }
 
-    let uid;
+    let payload;
     try {
-        ({ uid } = jwt.verify(token, jwtSecret));
-    } catch (jwtError) {
-        return res.status(401).json({
+      payload = jwt.verify(token, jwtSecret);
+    } catch {
+      return res.status(401).json({
         success: false,
         message: "Invalid or expired token",
-        });
+      });
     }
 
-    const user = await User.findById(uid);
+    const user = await User.findById(payload.uid);
 
     if (!user) {
-        return res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "The user doesn't exist in the database",
       });
     }
 
     if (user.status === false) {
-        return res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "User deactivated previously",
       });
@@ -59,38 +61,47 @@ export const validateJWT = async (req, res, next) => {
 
     req.user = user;
     next();
-    } catch (error) {
+  } catch (error) {
     console.error("JWT Validation Error:", error);
     return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token",
-        });
-    }
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
 
 export const validateTokenResponse = async (req, res) => {
   try {
-    let token =
-      req.cookies?.auth_token ||
-      req.body.token ||
-      req.query.token ||
-      req.headers["authorization"];
+    let token = extractToken(req);
 
-        const jwtSecret = getJwtSecret();
-        if (!jwtSecret) {
-        return res.status(500).json({
-            success: false,
-            message: "JWT secret is not configured on server",
-        });
-        }
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token not found",
+      });
+    }
 
-        const { uid } = jwt.verify(token, jwtSecret);
-        const user = await User.findById(uid);
+    token = token.replace(/^Bearer\s+/i, "");
 
-    token = token.replace(/^Bearer\s+/, "");
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT secret is not configured on server",
+      });
+    }
 
-    const { uid } = jwt.verify(token, process.env.SECRET_KEY);
-    const user = await User.findById(uid);
+    let payload;
+    try {
+      payload = jwt.verify(token, jwtSecret);
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+
+    const user = await User.findById(payload.uid);
 
     if (!user) {
       return res.status(401).json({
@@ -105,4 +116,22 @@ export const validateTokenResponse = async (req, res) => {
         message: "User deactivated previously",
       });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Token is valid",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+      error: error.message,
+    });
+  }
 };
