@@ -2,7 +2,8 @@ import rateLimit from "express-rate-limit";
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // Limita a 5 peticiones por IP por ventana
+  max: 20, // Permite un margen mayor para flujos reales (login + reintentos)
+  skipSuccessfulRequests: true, // No penaliza intentos que sí autentican
   message: {
     success: false,
     message:
